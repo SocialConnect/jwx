@@ -8,7 +8,7 @@ namespace SocialConnect\JWX\Exception;
 
 use Exception;
 
-class UnsupportedSignatureAlgoritm extends \SocialConnect\Common\Exception
+class UnsupportedSignatureAlgoritm extends RuntimeException
 {
     public function __construct($message = 'Unsupported signature algorithm', $code = 0, Exception $previous = null)
     {

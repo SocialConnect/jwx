@@ -10,7 +10,7 @@ namespace SocialConnect\JWX\Exception;
 
 use Exception;
 
-class UnsupportedJWK extends \SocialConnect\Common\Exception
+class UnsupportedJWK extends RuntimeException
 {
     public function __construct($message = 'Unsupported JWK', $code = 0, Exception $previous = null)
     {

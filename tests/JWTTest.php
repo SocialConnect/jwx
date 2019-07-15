@@ -4,13 +4,12 @@
  * @author: Patsura Dmitry https://github.com/ovr <talk@dmtry.me>
  */
 
-namespace Test\OpenIDConnect;
+namespace Test\JWX;
 
 use DateTime;
-use SocialConnect\OpenIDConnect\Exception\InvalidJWT;
-use SocialConnect\OpenIDConnect\JWK;
-use SocialConnect\OpenIDConnect\JWT;
-use Test\AbstractTestCase;
+use SocialConnect\JWX\Exception\InvalidJWT;
+use SocialConnect\JWX\JWK;
+use SocialConnect\JWX\JWT;
 
 class JWTTest extends AbstractTestCase
 {

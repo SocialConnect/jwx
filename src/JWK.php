@@ -60,7 +60,7 @@ class JWK
 
         $this->e = $parameters['e'];
 
-        if (!isset($parameters['d'])) {
+        if (isset($parameters['d'])) {
             throw new UnsupportedJWK('RSA with private key is not supported.');
         }
     }

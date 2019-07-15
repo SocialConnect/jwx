@@ -8,9 +8,7 @@ declare(strict_types=1);
 
 namespace SocialConnect\JWX\Exception;
 
-use Exception;
-
-class InvalidJWT extends \SocialConnect\Common\Exception
+class InvalidJWT extends RuntimeException
 {
     public function __construct($message = 'Not Valid JWT', $code = 0, Exception $previous = null)
     {

@@ -10,7 +10,7 @@ namespace SocialConnect\JWX\Exception;
 
 use Exception;
 
-class InvalidJWK extends \SocialConnect\Common\Exception
+class InvalidJWK extends RuntimeException
 {
     public function __construct($message = 'Not Valid JWK', $code = 0, Exception $previous = null)
     {
