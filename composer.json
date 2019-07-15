@@ -1,0 +1,27 @@
+{
+    "name": "socialconnect/jwx",
+    "description": "PHP library for JSON web tokens (JWT) and JWT",
+    "keywords": [
+        "jwt",
+        "json web token",
+        "jwe"
+    ],
+    "type": "library",
+    "require": {
+        "php": ">=7.1",
+        "phpunit/phpunit": "^8.3@dev"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dmitry Patsura",
+            "email": "talk@dmtry.me"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "SocialConnect\\JWX\\": ""
+        }
+    }
+}
