@@ -9,7 +9,11 @@
     "type": "library",
     "require": {
         "php": ">=7.1",
-        "phpunit/phpunit": "^8.3@dev"
+        "ext-json": "*",
+        "phpunit/phpunit": "^8.2"
+    },
+    "suggest": {
+        "ext-openssl": "Please install openssl extension to use RS encryption"
     },
     "license": "MIT",
     "authors": [
@@ -18,7 +22,7 @@
             "email": "talk@dmtry.me"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "autoload": {
         "psr-4": {
             "SocialConnect\\JWX\\": ""
