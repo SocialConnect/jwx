@@ -6,6 +6,11 @@ JWX
 
 ## [Documentation](https://socialconnect.lowl.io/jwx.html) :: [Getting Started](https://socialconnect.lowl.io/jwx.html)
 
+Implementation:
+
+- JWT (JSON Web Token) [RFC 7519](https://tools.ietf.org/html/rfc7519)
+- JWK (JSON Web Keys) [RFC 7517](https://tools.ietf.org/html/rfc7517)
+
 ## Encode
 
 ```php
