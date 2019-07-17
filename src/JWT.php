@@ -84,7 +84,7 @@ class JWT
      * @param array $header
      * @param string|null $signature
      */
-    public function __construct(array $payload, array $header, $signature = null)
+    public function __construct(array $payload, array $header = [], $signature = null)
     {
         $this->payload = $payload;
         $this->header = $header;
@@ -259,5 +259,65 @@ class JWT
     public function getPayload(): array
     {
         return $this->payload;
+    }
+
+    protected function signature(string $privateKeyOrSecret, string $alg, string $data): string
+    {
+        $supported = isset(self::$algorithms[$alg]);
+        if (!$supported) {
+            throw new UnsupportedSignatureAlgoritm($alg);
+        }
+
+        list ($function, $signatureAlg) = self::$algorithms[$alg];
+        switch ($function) {
+            case 'openssl':
+                if (!function_exists('openssl_verify')) {
+                    throw new RuntimeException('Openssl-ext is required to use RS encryption.');
+                }
+
+                return openssl_encrypt(
+                    $data,
+                    $signatureAlg,
+                    $privateKeyOrSecret
+                );
+            case 'hash_hmac':
+                if (!function_exists('hash_hmac')) {
+                    throw new RuntimeException('hash-ext is required to use HS encryption.');
+                }
+
+                return hash_hmac($signatureAlg, $data, $privateKeyOrSecret, true);
+        }
+
+        throw new UnsupportedSignatureAlgoritm($this->header['alg']);
+
+    }
+
+    /**
+     * @param string $privateKeyOrSecret
+     * @param string $alg
+     * @return string
+     */
+    public function encode(string $privateKeyOrSecret, string $alg): string
+    {
+        $this->header['alg'] = $alg;
+        $this->header['typ'] = 'JWT';
+
+        $header = json_encode($this->header);
+        if ($header === false) {
+            throw new InvalidJWT('Cannot encode header to JSON');
+        }
+
+        $payload = json_encode($this->payload);
+        if ($payload === false) {
+            throw new InvalidJWT('Cannot encode payload to JSON');
+        }
+
+        $header64 = base64_encode($header);
+        $payload64 = base64_encode($payload);
+
+        $signature = $this->signature($privateKeyOrSecret, $alg, "{$header64}.{$payload64}");
+        $signature64 = JWT::urlsafeB64Encode($signature);
+
+        return "{$header64}.{$payload64}.{$signature64}";
     }
 }
