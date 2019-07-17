@@ -166,20 +166,36 @@ class JWT
          * @link https://tools.ietf.org/html/rfc7519#section-4.1.5
          * "nbf" (Not Before) Claim check
          */
-        if (isset($this->payload['nbf']) && $this->payload['nbf'] > ($now + self::$screw)) {
-            throw new InvalidJWT(
-                'nbf (Not Fefore) claim is not valid ' . date(DateTime::RFC3339, $this->payload['nbf'])
-            );
+        if (isset($this->payload['nbf'])) {
+            if (!is_numeric($this->payload['nbf'])) {
+                throw new InvalidJWT(
+                    'nbf (Not Fefore) must be numeric'
+                );
+            }
+
+            if ($this->payload['nbf'] > ($now + self::$screw)) {
+                throw new InvalidJWT(
+                    'nbf (Not Fefore) claim is not valid ' . date(DateTime::RFC3339, $this->payload['nbf'])
+                );
+            }
         }
 
         /**
          * @link https://tools.ietf.org/html/rfc7519#section-4.1.6
          * "iat" (Issued At) Claim
          */
-        if (isset($this->payload['iat']) && $this->payload['iat'] > ($now + self::$screw)) {
-            throw new InvalidJWT(
-                'iat (Issued At) claim is not valid ' . date(DateTime::RFC3339, $this->payload['iat'])
-            );
+        if (isset($this->payload['iat'])) {
+            if (!is_numeric($this->payload['iat'])) {
+                throw new InvalidJWT(
+                    'iat (Issued At) must be numeric'
+                );
+            }
+
+            if ($this->payload['iat'] > ($now + self::$screw)) {
+                throw new InvalidJWT(
+                    'iat (Issued At) claim is not valid ' . date(DateTime::RFC3339, $this->payload['iat'])
+                );
+            }
         }
 
         /**
@@ -346,7 +362,7 @@ class JWT
             $payload['exp'] = time() + $options->getExpirationTime();
         }
 
-        $payloadStr = json_encode($this->payload);
+        $payloadStr = json_encode($payload);
         if ($payloadStr === false) {
             throw new InvalidJWT('Cannot encode payload to JSON');
         }
