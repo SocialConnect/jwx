@@ -18,7 +18,7 @@ abstract class AbstractTestCase extends TestCase
      * @return mixed
      * @throws \ReflectionException
      */
-    protected static function callProtectedMethod($object, $name, array $params = [])
+    protected static function callProtectedMethod($object, $name, ...$params)
     {
         $class = new ReflectionClass($object);
 

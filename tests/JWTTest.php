@@ -156,7 +156,10 @@ class JWTTest extends AbstractTestCase
 
         self::callProtectedMethod(
             $token,
-            'validateHeader'
+            'validateHeader',
+            [
+                [],
+            ]
         );
 
         // to skip warning
@@ -177,7 +180,10 @@ class JWTTest extends AbstractTestCase
 
         self::callProtectedMethod(
             $token,
-            'validateHeader'
+            'validateHeader',
+            [
+                [],
+            ]
         );
     }
 
@@ -195,7 +201,12 @@ class JWTTest extends AbstractTestCase
 
         self::callProtectedMethod(
             $token,
-            'validateHeader'
+            'validateHeader',
+            [
+                'jwk' => [
+
+                ]
+            ]
         );
     }
 

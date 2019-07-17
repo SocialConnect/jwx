@@ -14,7 +14,18 @@ JWX
 $jwt = new \SocialConnect\JWX\JWT([
     'uid' => 5,
 ]);
-var_dump($jwt->encode('TEST', 'HS256'));
+
+$token = $jwt->encode('TEST', 'HS256');
+var_dump($token);
+```
+
+## Decode
+
+```php
+<?php
+
+$token = \SocialConnect\JWX\JWT::decode($token, ['key' => 'TEST', 'allowed' => ['HS256']]);
+var_dump($token);
 ```
 
 ### License
