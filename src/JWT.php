@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace SocialConnect\JWX;
 
 use DateTime;
+use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\Exception\RuntimeException;
 use SocialConnect\JWX\Exception\UnsupportedSignatureAlgoritm;
@@ -183,10 +184,18 @@ class JWT
          * @link https://tools.ietf.org/html/rfc7519#section-4.1.4
          * "exp" (Expiration Time) Claim
          */
-        if (isset($this->payload['exp']) && ($now - self::$screw) >= $this->payload['exp']) {
-            throw new InvalidJWT(
-                'exp (Expiration Time) claim is not valid ' . date(DateTime::RFC3339, $this->payload['exp'])
-            );
+        if (isset($this->payload['exp'])) {
+            if (!is_numeric($this->payload['exp'])) {
+                throw new InvalidJWT(
+                    'exp (Expiration Time) must be numeric'
+                );
+            }
+
+            if (($now - self::$screw) >= $this->payload['exp']) {
+                throw new ExpiredJWT(
+                    'exp (Expiration Time) claim is not valid ' . date(DateTime::RFC3339, $this->payload['exp'])
+                );
+            }
         }
     }
 

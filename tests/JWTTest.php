@@ -7,6 +7,7 @@
 namespace Test\JWX;
 
 use DateTime;
+use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\JWK;
 use SocialConnect\JWX\JWT;
@@ -122,7 +123,27 @@ class JWTTest extends AbstractTestCase
         parent::assertTrue(true);
     }
 
-    public function testValidateClaimsExpFail()
+    public function testValidateClaimsExpNotNumeric()
+    {
+        $token = new JWT(
+            array(
+                'nbf' => time(),
+                'iat' => time(),
+                'exp' => 'invalid',
+            ),
+            $this->getTestHeader()
+        );
+
+        parent::expectException(InvalidJWT::class);
+        parent::expectExceptionMessage('exp (Expiration Time) must be numeric');
+
+        self::callProtectedMethod(
+            $token,
+            'validateClaims'
+        );
+    }
+
+    public function testValidateClaimsExpExpired()
     {
         $token = new JWT(
             array(
@@ -133,7 +154,7 @@ class JWTTest extends AbstractTestCase
             $this->getTestHeader()
         );
 
-        parent::expectException(InvalidJWT::class);
+        parent::expectException(ExpiredJWT::class);
         parent::expectExceptionMessage(
             sprintf(
                 'exp (Expiration Time) claim is not valid %s',
@@ -158,7 +179,7 @@ class JWTTest extends AbstractTestCase
             $token,
             'validateHeader',
             [
-                [],
+                'allowed' => ['RS256']
             ]
         );
 
@@ -203,9 +224,8 @@ class JWTTest extends AbstractTestCase
             $token,
             'validateHeader',
             [
-                'jwk' => [
-
-                ]
+                'jwk' => [],
+                'allowed' => ['RS256']
             ]
         );
     }
@@ -242,7 +262,8 @@ class JWTTest extends AbstractTestCase
         $jwt = JWT::decode(
             $jwtAsString,
             [
-                $kid
+                'jwk' => [$kid],
+                'allowed' => ['HS512'],
             ]
         );
 
