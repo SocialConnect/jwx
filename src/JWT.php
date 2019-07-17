@@ -335,7 +335,7 @@ class JWT
         $header['alg'] = $alg;
         $header['typ'] = 'JWT';
 
-        $headerStr = json_encode($this->header);
+        $headerStr = json_encode($header);
         if ($headerStr === false) {
             throw new InvalidJWT('Cannot encode header to JSON');
         }
@@ -358,5 +358,13 @@ class JWT
         $signature64 = JWT::urlsafeB64Encode($signature);
 
         return "{$header64}.{$payload64}.{$signature64}";
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeader(): array
+    {
+        return $this->header;
     }
 }

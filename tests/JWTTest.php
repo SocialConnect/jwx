@@ -8,6 +8,7 @@ namespace Test\JWX;
 
 use DateTime;
 use SocialConnect\JWX\DecodeOptions;
+use SocialConnect\JWX\EncodeOptions;
 use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\JWK;
@@ -39,22 +40,6 @@ class JWTTest extends AbstractTestCase
             'alg' => $alg,
             'kid' => $kid
         ];
-    }
-
-    protected function encodeJWT(array $payload, array $jwk)
-    {
-        $header = $this->getTestHeader($jwk['kty'], $jwk['kid']);
-
-        $encodedHeader = json_encode($header);
-        $b64Header = base64_encode($encodedHeader);
-
-        $encodedPayload = json_encode($payload);
-        $b64Payload = base64_encode($encodedPayload);
-
-        $signature = hash_hmac('SHA512', $b64Header . '.' . $b64Payload, (new JWK($jwk))->getPublicKey(), true);
-        $b64Signature = JWT::urlsafeB64Encode($signature);
-
-        return $b64Header . '.' . $b64Payload . '.' . $b64Signature;
     }
 
     public function testValidateClaimsSuccess()
@@ -241,10 +226,11 @@ class JWTTest extends AbstractTestCase
         );
     }
 
-    public function testDecodeSuccess()
+    public function testEncodeToDecodeSuccess()
     {
-        $kid = [
-            'kid' => 'super-kid-' . time(),
+        $kid = 'super-kid-' . time();
+        $jwk = [
+            'kid' => $kid,
             'kty' => 'HS512',
             'n' => 'test',
             'e' => 'test'
@@ -254,19 +240,18 @@ class JWTTest extends AbstractTestCase
             'uid' => '2955b34c-7a3b-4d96-9fd1-2930c18f9989'
         ];
 
-        $jwtAsString =  $this->encodeJWT(
-            $payload,
-            $kid
-        );
+        $token = new JWT($payload, ['kid' => $kid]);
+        $jwtAsString = $token->encode((new JWK($jwk))->getPublicKey(), 'HS512', new EncodeOptions());
 
-        $decodeOptions = new DecodeOptions(['HS512']);
-        $decodeOptions->setJwkSet([$kid]);
+        $decodeOptions = new DecodeOptions(['HS512'], 'TEST');
+        $decodeOptions->setJwkSet([$jwk]);
 
-        $jwt = JWT::decode(
-            $jwtAsString,
-            $decodeOptions
-        );
+        $jwt = JWT::decode($jwtAsString, $decodeOptions);
 
         parent::assertSame($payload, $jwt->getPayload());
+
+        $headers = $jwt->getHeader();
+        parent::assertArrayHasKey('kid', $headers);
+        parent::assertArrayHasKey('alg', $headers);
     }
 }
