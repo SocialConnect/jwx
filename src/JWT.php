@@ -36,6 +36,10 @@ class JWT
         'RS256' => ['openssl', 'SHA256'],
         'RS384' => ['openssl', 'SHA384'],
         'RS512' => ['openssl', 'SHA512'],
+        // ES
+        'ES256' => ['openssl', 'SHA256'],
+        'ES384' => ['openssl', 'SHA384'],
+        'ES512' => ['openssl', 'SHA512'],
     );
 
     /**
