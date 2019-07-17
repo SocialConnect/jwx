@@ -25,7 +25,7 @@ class EncodeOptions
     /**
      * @return int|null
      */
-    public function getExpirationTime(): int
+    public function getExpirationTime()
     {
         return $this->expirationTime;
     }

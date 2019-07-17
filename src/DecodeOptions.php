@@ -66,7 +66,7 @@ class DecodeOptions
     /**
      * @return string|null
      */
-    public function getSecretOrKey(): string
+    public function getSecretOrKey()
     {
         return $this->secretOrKey;
     }

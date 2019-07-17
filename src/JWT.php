@@ -308,6 +308,12 @@ class JWT
         return $this->payload;
     }
 
+    /**
+     * @param string $privateKeyOrSecret
+     * @param string $alg
+     * @param string $data
+     * @return string
+     */
     protected function signature(string $privateKeyOrSecret, string $alg, string $data): string
     {
         $supported = isset(self::$algorithms[$alg]);
@@ -322,11 +328,14 @@ class JWT
                     throw new RuntimeException('Openssl-ext is required to use RS encryption.');
                 }
 
-                return openssl_encrypt(
+                $signatureOrFalse = openssl_encrypt(
                     $data,
                     $signatureAlg,
                     $privateKeyOrSecret
                 );
+                if ($signatureOrFalse === false) {
+                    throw new RuntimeException('Unable to generate signature by openssl_encrypt');
+                }
             case 'hash_hmac':
                 if (!function_exists('hash_hmac')) {
                     throw new RuntimeException('hash-ext is required to use HS encryption.');

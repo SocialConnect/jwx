@@ -14,7 +14,7 @@ abstract class AbstractTestCase extends TestCase
     /**
      * @param object $object
      * @param string $name
-     * @param array $params
+     * @param array<int, mixed> $params
      * @return mixed
      * @throws \ReflectionException
      */
