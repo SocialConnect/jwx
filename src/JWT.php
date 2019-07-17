@@ -11,7 +11,7 @@ use DateTime;
 use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\Exception\RuntimeException;
-use SocialConnect\JWX\Exception\UnsupportedSignatureAlgoritm;
+use SocialConnect\JWX\Exception\UnsupportedSignatureAlgorithm;
 
 class JWT
 {
@@ -86,13 +86,13 @@ class JWT
 
     /**
      * @param array $payload
-     * @param array $header
+     * @param array $headers
      * @param string|null $signature
      */
-    public function __construct(array $payload, array $header = [], $signature = null)
+    public function __construct(array $payload, array $headers = [], $signature = null)
     {
         $this->payload = $payload;
-        $this->header = $header;
+        $this->headers = $headers;
         $this->signature = $signature;
     }
 
@@ -139,15 +139,15 @@ class JWT
 
     protected function validateHeader(DecodeOptions $options)
     {
-        if (!isset($this->header['alg'])) {
+        if (!isset($this->headers['alg'])) {
             throw new InvalidJWT('No alg inside header');
         }
 
-        if (!$options->isAllowedAlgorithms($this->header['alg'])) {
+        if (!$options->isAllowedAlgorithms($this->headers['alg'])) {
             throw new InvalidJWT('Not allowed alg inside header');
         }
 
-        if (isset($this->header['kid'])) {
+        if (isset($this->headers['kid'])) {
             if (!$options->hasJwkSet()) {
                 throw new RuntimeException('Please specify jwk set in DecodeOptions, because there is kid inside header');
             }
@@ -253,17 +253,17 @@ class JWT
      * @param string $data
      * @param DecodeOptions $options
      * @return bool
-     * @throws UnsupportedSignatureAlgoritm
+     * @throws UnsupportedSignatureAlgorithm
      */
     protected function verifySignature($data, DecodeOptions $options)
     {
-        $supported = isset(self::$algorithms[$this->header['alg']]);
+        $supported = isset(self::$algorithms[$this->headers['alg']]);
         if (!$supported) {
-            throw new UnsupportedSignatureAlgoritm($this->header['alg']);
+            throw new UnsupportedSignatureAlgorithm($this->headers['alg']);
         }
 
         if ($options->hasJwkSet()) {
-            $jwk = $this->findKeyByKind($options->getJwkSet(), $this->header['kid']);
+            $jwk = $this->findKeyByKind($options->getJwkSet(), $this->headers['kid']);
             $secretOrKey = $jwk->getPublicKey();
         } else {
             $secretOrKey = $options->getSecretOrKey();
@@ -272,7 +272,7 @@ class JWT
             }
         }
 
-        list ($function, $signatureAlg) = self::$algorithms[$this->header['alg']];
+        list ($function, $signatureAlg) = self::$algorithms[$this->headers['alg']];
         switch ($function) {
             case 'openssl':
                 if (!function_exists('openssl_verify')) {
@@ -297,7 +297,7 @@ class JWT
                 return hash_equals($this->signature, $hash);
         }
 
-        throw new UnsupportedSignatureAlgoritm($this->header['alg']);
+        throw new UnsupportedSignatureAlgorithm($this->headers['alg']);
     }
 
     /**
@@ -318,7 +318,7 @@ class JWT
     {
         $supported = isset(self::$algorithms[$alg]);
         if (!$supported) {
-            throw new UnsupportedSignatureAlgoritm($alg);
+            throw new UnsupportedSignatureAlgorithm($alg);
         }
 
         list ($function, $signatureAlg) = self::$algorithms[$alg];
@@ -344,7 +344,7 @@ class JWT
                 return hash_hmac($signatureAlg, $data, $privateKeyOrSecret, true);
         }
 
-        throw new UnsupportedSignatureAlgoritm($this->header['alg']);
+        throw new UnsupportedSignatureAlgorithm($this->headers['alg']);
 
     }
 
@@ -356,11 +356,11 @@ class JWT
      */
     public function encode(string $privateKeyOrSecret, string $alg, EncodeOptions $options): string
     {
-        $header = $this->header;
-        $header['alg'] = $alg;
-        $header['typ'] = 'JWT';
+        $headers = $this->headers;
+        $headers['alg'] = $alg;
+        $headers['typ'] = 'JWT';
 
-        $headerStr = json_encode($header);
+        $headerStr = json_encode($headers);
         if ($headerStr === false) {
             throw new InvalidJWT('Cannot encode header to JSON');
         }
@@ -388,8 +388,8 @@ class JWT
     /**
      * @return array
      */
-    public function getHeader(): array
+    public function getHeaders(): array
     {
-        return $this->header;
+        return $this->headers;
     }
 }

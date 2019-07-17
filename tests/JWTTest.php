@@ -250,7 +250,7 @@ class JWTTest extends AbstractTestCase
 
         parent::assertSame($payload, $jwt->getPayload());
 
-        $headers = $jwt->getHeader();
+        $headers = $jwt->getHeaders();
         parent::assertArrayHasKey('kid', $headers);
         parent::assertArrayHasKey('alg', $headers);
     }
