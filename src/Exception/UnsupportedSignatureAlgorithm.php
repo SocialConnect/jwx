@@ -6,11 +6,11 @@ declare(strict_types=1);
 
 namespace SocialConnect\JWX\Exception;
 
-use Exception;
+use Throwable;
 
-class UnsupportedSignatureAlgoritm extends RuntimeException
+class UnsupportedSignatureAlgorithm extends RuntimeException
 {
-    public function __construct($message = 'Unsupported signature algorithm', $code = 0, Exception $previous = null)
+    public function __construct($message = 'Unsupported signature algorithm', $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
