@@ -15,7 +15,10 @@ $jwt = new \SocialConnect\JWX\JWT([
     'uid' => 5,
 ]);
 
-$token = $jwt->encode('TEST', 'HS256');
+$encodeOptions = new \SocialConnect\JWX\EncodeOptions();
+$encodeOptions->setExpirationTime(600);
+
+$token = $jwt->encode('TEST', 'HS256', $encodeOptions);
 var_dump($token);
 ```
 

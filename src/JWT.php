@@ -326,25 +326,33 @@ class JWT
     /**
      * @param string $privateKeyOrSecret
      * @param string $alg
+     * @param EncodeOptions $options
      * @return string
      */
-    public function encode(string $privateKeyOrSecret, string $alg): string
+    public function encode(string $privateKeyOrSecret, string $alg, EncodeOptions $options): string
     {
-        $this->header['alg'] = $alg;
-        $this->header['typ'] = 'JWT';
+        $header = $this->header;
+        $header['alg'] = $alg;
+        $header['typ'] = 'JWT';
 
-        $header = json_encode($this->header);
-        if ($header === false) {
+        $headerStr = json_encode($this->header);
+        if ($headerStr === false) {
             throw new InvalidJWT('Cannot encode header to JSON');
         }
 
-        $payload = json_encode($this->payload);
-        if ($payload === false) {
+        $payload = $this->payload;
+
+        if ($options->hasExpirationTime()) {
+            $payload['exp'] = time() + $options->getExpirationTime();
+        }
+
+        $payloadStr = json_encode($this->payload);
+        if ($payloadStr === false) {
             throw new InvalidJWT('Cannot encode payload to JSON');
         }
 
-        $header64 = base64_encode($header);
-        $payload64 = base64_encode($payload);
+        $header64 = base64_encode($headerStr);
+        $payload64 = base64_encode($payloadStr);
 
         $signature = $this->signature($privateKeyOrSecret, $alg, "{$header64}.{$payload64}");
         $signature64 = JWT::urlsafeB64Encode($signature);

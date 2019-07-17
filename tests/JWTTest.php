@@ -7,6 +7,7 @@
 namespace Test\JWX;
 
 use DateTime;
+use SocialConnect\JWX\DecodeOptions;
 use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\JWK;
@@ -175,12 +176,13 @@ class JWTTest extends AbstractTestCase
             $this->getTestHeader()
         );
 
+        $options = new DecodeOptions(['RS256']);
+        $options->setJwkSet([]);
+
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            [
-                'allowed' => ['RS256']
-            ]
+            $options
         );
 
         // to skip warning
@@ -202,9 +204,7 @@ class JWTTest extends AbstractTestCase
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            [
-                [],
-            ]
+            new DecodeOptions([])
         );
     }
 
@@ -220,13 +220,13 @@ class JWTTest extends AbstractTestCase
         parent::expectException(InvalidJWT::class);
         parent::expectExceptionMessage('No kid inside header');
 
+        $options = new DecodeOptions(['RS256']);
+        $options->setJwkSet([]);
+
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            [
-                'jwk' => [],
-                'allowed' => ['RS256']
-            ]
+            $options
         );
     }
 
@@ -237,7 +237,7 @@ class JWTTest extends AbstractTestCase
 
         JWT::decode(
             'lol',
-            []
+            new DecodeOptions([])
         );
     }
 
@@ -259,12 +259,12 @@ class JWTTest extends AbstractTestCase
             $kid
         );
 
+        $decodeOptions = new DecodeOptions(['HS512']);
+        $decodeOptions->setJwkSet([$kid]);
+
         $jwt = JWT::decode(
             $jwtAsString,
-            [
-                'jwk' => [$kid],
-                'allowed' => ['HS512'],
-            ]
+            $decodeOptions
         );
 
         parent::assertSame($payload, $jwt->getPayload());
