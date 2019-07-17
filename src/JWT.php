@@ -98,11 +98,11 @@ class JWT
 
     /**
      * @param string $token
-     * @param array $options
+     * @param DecodeOptions $options
      * @return JWT
      * @throws InvalidJWT
      */
-    public static function decode(string $token, array $options)
+    public static function decode(string $token, DecodeOptions $options)
     {
         $parts = explode('.', $token);
         if (count($parts) !== 3) {
@@ -137,22 +137,24 @@ class JWT
         return $token;
     }
 
-    protected function validateHeader(array $options)
+    protected function validateHeader(DecodeOptions $options)
     {
         if (!isset($this->header['alg'])) {
             throw new InvalidJWT('No alg inside header');
         }
 
-        if (!array_key_exists('allowed', $options)) {
-            throw new RuntimeException('Please specify allowed inside options. (allowed algorithms)');
-        } else {
-            if (!in_array($this->header['alg'], $options['allowed'])) {
-                throw new InvalidJWT('Not allowed alg inside header');
-            }
+        if (!$options->isAllowedAlgorithms($this->header['alg'])) {
+            throw new InvalidJWT('Not allowed alg inside header');
         }
 
-        if (array_key_exists('jwk', $options) && !isset($this->header['kid'])) {
-            throw new InvalidJWT('No kid inside header');
+        if (isset($this->header['kid'])) {
+            if (!$options->hasJwkSet()) {
+                throw new RuntimeException('Please specify jwk set in DecodeOptions, because there is kid inside header');
+            }
+        } else {
+            if ($options->hasJwkSet()) {
+                throw new InvalidJWT('No kid inside header');
+            }
         }
     }
 
@@ -201,10 +203,10 @@ class JWT
 
     /**
      * @param string $data
-     * @param array $options
+     * @param DecodeOptions $options
      * @throws InvalidJWT
      */
-    protected function validate($data, array $options)
+    protected function validate($data, DecodeOptions $options)
     {
         $this->validateHeader($options);
         $this->validateClaims();
@@ -233,25 +235,24 @@ class JWT
 
     /**
      * @param string $data
-     * @param array $options
+     * @param DecodeOptions $options
      * @return bool
      * @throws UnsupportedSignatureAlgoritm
      */
-    protected function verifySignature($data, array $options)
+    protected function verifySignature($data, DecodeOptions $options)
     {
         $supported = isset(self::$algorithms[$this->header['alg']]);
         if (!$supported) {
             throw new UnsupportedSignatureAlgoritm($this->header['alg']);
         }
 
-        if (array_key_exists('jwk', $options)) {
-            $jwk = $this->findKeyByKind($options['jwk'], $this->header['kid']);
-            $key = $jwk->getPublicKey();
+        if ($options->hasJwkSet()) {
+            $jwk = $this->findKeyByKind($options->getJwkSet(), $this->header['kid']);
+            $secretOrKey = $jwk->getPublicKey();
         } else {
-            if (isset($options['key'])) {
-                $key = $options['key'];
-            } else {
-                throw new RuntimeException('Please specify key inside $options');
+            $secretOrKey = $options->getSecretOrKey();
+            if (!$secretOrKey) {
+                throw new RuntimeException('Please specify $secretOrKey inside $options');
             }
         }
 
@@ -265,7 +266,7 @@ class JWT
                 $result = openssl_verify(
                     $data,
                     $this->signature,
-                    $key,
+                    $secretOrKey,
                     $signatureAlg
                 );
                 
@@ -275,7 +276,7 @@ class JWT
                     throw new RuntimeException('hash-ext is required to use HS encryption.');
                 }
 
-                $hash = hash_hmac($signatureAlg, $data, $key, true);
+                $hash = hash_hmac($signatureAlg, $data, $secretOrKey, true);
 
                 return hash_equals($this->signature, $hash);
         }
