@@ -46,7 +46,7 @@ class JWT
     /**
      * @var array
      */
-    protected $header;
+    protected $headers;
 
     /**
      * @var array
@@ -81,7 +81,12 @@ class JWT
             $input .= str_repeat('=', $padlen);
         }
 
-        return base64_decode(strtr($input, '-_', '+/'));
+        $strOrFalse = base64_decode(strtr($input, '-_', '+/'));
+        if ($strOrFalse == false) {
+            throw new RuntimeException('Unable to decode base64 string');
+        }
+
+        return $strOrFalse;
     }
 
     /**
@@ -175,7 +180,7 @@ class JWT
 
             if ($this->payload['nbf'] > ($now + self::$screw)) {
                 throw new InvalidJWT(
-                    'nbf (Not Fefore) claim is not valid ' . date(DateTime::RFC3339, $this->payload['nbf'])
+                    'nbf (Not Fefore) claim is not valid ' . date(DateTime::RFC3339, (int) $this->payload['nbf'])
                 );
             }
         }
@@ -193,7 +198,7 @@ class JWT
 
             if ($this->payload['iat'] > ($now + self::$screw)) {
                 throw new InvalidJWT(
-                    'iat (Issued At) claim is not valid ' . date(DateTime::RFC3339, $this->payload['iat'])
+                    'iat (Issued At) claim is not valid ' . date(DateTime::RFC3339, (int) $this->payload['iat'])
                 );
             }
         }
@@ -211,7 +216,7 @@ class JWT
 
             if (($now - self::$screw) >= $this->payload['exp']) {
                 throw new ExpiredJWT(
-                    'exp (Expiration Time) claim is not valid ' . date(DateTime::RFC3339, $this->payload['exp'])
+                    'exp (Expiration Time) claim is not valid ' . date(DateTime::RFC3339, (int) $this->payload['exp'])
                 );
             }
         }

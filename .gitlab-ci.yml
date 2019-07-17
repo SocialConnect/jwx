@@ -34,6 +34,6 @@ phpstan:
   image: registry.gitlab.com/socialconnect-php/auth:7.3
   script:
     - composer install -o
-    - ./vendor/bin/phpstan analyse src/ tests/ --no-progress --level 5
+    - ./vendor/bin/phpstan analyse src/ tests/ --no-progress --level 6
   tags:
     - docker
