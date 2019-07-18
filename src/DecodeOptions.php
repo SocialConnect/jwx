@@ -24,7 +24,28 @@ class DecodeOptions
      */
     protected $secretOrKey;
 
-    public function __construct(array $allowedAlgorithms, string $secretOrKey = null)
+    /**
+     * All algorithms without NONE
+     */
+    const SECURE_ALGORITHMS = [
+        'HS256',
+        'HS384',
+        'HS512',
+        //
+        'RS256',
+        'RS384',
+        'RS512',
+        //
+        'ES256',
+        'ES384',
+        'ES512',
+    ];
+
+    /**
+     * @param array $allowedAlgorithms
+     * @param string|null $secretOrKey
+     */
+    public function __construct(array $allowedAlgorithms = self::SECURE_ALGORITHMS, string $secretOrKey = null)
     {
         $this->allowedAlgorithms = $allowedAlgorithms;
         $this->secretOrKey = $secretOrKey;
