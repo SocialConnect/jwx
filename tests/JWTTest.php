@@ -230,6 +230,7 @@ class JWTTest extends AbstractTestCase
         $kid = 'super-kid-' . time();
 
         return [
+            // RSA
             [
                 file_get_contents(__DIR__ . '/assets/rs256.key'),
                 file_get_contents(__DIR__ . '/assets/rs256.key.pub'),
@@ -254,6 +255,32 @@ class JWTTest extends AbstractTestCase
                 new EncodeOptions(),
                 new DecodeOptions(['RS512']),
             ],
+            // HSA
+            [
+                file_get_contents(__DIR__ . '/assets/rs256.key'),
+                file_get_contents(__DIR__ . '/assets/rs256.key.pub'),
+                'ES256',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['ES256']),
+            ],
+            [
+                file_get_contents(__DIR__ . '/assets/rs384.key'),
+                file_get_contents(__DIR__ . '/assets/rs384.key.pub'),
+                'ES384',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['ES384']),
+            ],
+            [
+                file_get_contents(__DIR__ . '/assets/rs512.key'),
+                file_get_contents(__DIR__ . '/assets/rs512.key.pub'),
+                'ES512',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['ES512']),
+            ],
+            // JWKSet for RSA
             [
                 file_get_contents(__DIR__ . '/assets/rs512.key'),
                 new JWKSet([
@@ -263,7 +290,32 @@ class JWTTest extends AbstractTestCase
                 ['kid' => $kid],
                 new EncodeOptions(),
                 new DecodeOptions(['RS512']),
-            ]
+            ],
+            // HS
+            [
+                'secret',
+                'secret',
+                'HS256',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['HS256']),
+            ],
+            [
+                'secret',
+                'secret',
+                'HS384',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['HS384']),
+            ],
+            [
+                'secret',
+                'secret',
+                'HS512',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['HS512']),
+            ],
         ];
     }
 
