@@ -123,4 +123,12 @@ class JWK
         $temp = ltrim(pack('N', $length), chr(0));
         return pack('Ca*', 0x80 | strlen($temp), $temp);
     }
+
+    /**
+     * @return string
+     */
+    public function getKty(): string
+    {
+        return $this->kty;
+    }
 }

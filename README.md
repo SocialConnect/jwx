@@ -32,8 +32,9 @@ var_dump($token);
 ```php
 <?php
 
-$decodeOptions = new \SocialConnect\JWX\DecodeOptions(['HS256'], 'TEST');
-$token = \SocialConnect\JWX\JWT::decode($token, $decodeOptions);
+$decodeOptions = new \SocialConnect\JWX\DecodeOptions(['HS256']);
+$token = \SocialConnect\JWX\JWT::decode('TEST', $token, $decodeOptions);
+
 var_dump($token);
 ```
 

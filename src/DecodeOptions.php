@@ -15,16 +15,6 @@ class DecodeOptions
     protected $allowedAlgorithms;
 
     /**
-     * @var array|null
-     */
-    protected $jwkSet = null;
-
-    /**
-     * @var string|null
-     */
-    protected $secretOrKey;
-
-    /**
      * All algorithms without NONE
      */
     const SECURE_ALGORITHMS = [
@@ -45,10 +35,9 @@ class DecodeOptions
      * @param array $allowedAlgorithms
      * @param string|null $secretOrKey
      */
-    public function __construct(array $allowedAlgorithms = self::SECURE_ALGORITHMS, string $secretOrKey = null)
+    public function __construct(array $allowedAlgorithms = self::SECURE_ALGORITHMS)
     {
         $this->allowedAlgorithms = $allowedAlgorithms;
-        $this->secretOrKey = $secretOrKey;
     }
 
     /**
@@ -58,37 +47,5 @@ class DecodeOptions
     public function isAllowedAlgorithms(string $algorithm): bool
     {
         return in_array($algorithm, $this->allowedAlgorithms, true);
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasJwkSet(): bool
-    {
-        return $this->jwkSet !== null;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getJwkSet()
-    {
-        return $this->jwkSet;
-    }
-
-    /**
-     * @param array $jwkSet
-     */
-    public function setJwkSet(array $jwkSet)
-    {
-        $this->jwkSet = $jwkSet;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getSecretOrKey()
-    {
-        return $this->secretOrKey;
     }
 }

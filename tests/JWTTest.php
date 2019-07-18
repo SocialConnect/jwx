@@ -12,6 +12,7 @@ use SocialConnect\JWX\EncodeOptions;
 use SocialConnect\JWX\Exception\ExpiredJWT;
 use SocialConnect\JWX\Exception\InvalidJWT;
 use SocialConnect\JWX\JWK;
+use SocialConnect\JWX\JWKSet;
 use SocialConnect\JWX\JWT;
 
 class JWTTest extends AbstractTestCase
@@ -161,13 +162,11 @@ class JWTTest extends AbstractTestCase
             $this->getTestHeader()
         );
 
-        $options = new DecodeOptions(['RS256']);
-        $options->setJwkSet([]);
-
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            $options
+            new JWKSet([]),
+            new DecodeOptions(['RS256'])
         );
 
         // to skip warning
@@ -189,6 +188,7 @@ class JWTTest extends AbstractTestCase
         self::callProtectedMethod(
             $token,
             'validateHeader',
+            '',
             new DecodeOptions([])
         );
     }
@@ -205,13 +205,11 @@ class JWTTest extends AbstractTestCase
         parent::expectException(InvalidJWT::class);
         parent::expectExceptionMessage('No kid inside header');
 
-        $options = new DecodeOptions(['RS256']);
-        $options->setJwkSet([]);
-
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            $options
+            new JWKSet([]),
+            new DecodeOptions(['RS256'])
         );
     }
 
@@ -222,7 +220,8 @@ class JWTTest extends AbstractTestCase
 
         JWT::decode(
             'lol',
-            new DecodeOptions([])
+            'heh',
+            new DecodeOptions()
         );
     }
 
@@ -237,32 +236,37 @@ class JWTTest extends AbstractTestCase
         ];
 
         $decodeOptions = new DecodeOptions(['HS512']);
-        $decodeOptions->setJwkSet([$jwk]);
 
         return [
             [
                 file_get_contents(__DIR__ . '/assets/rs256.key'),
+                file_get_contents(__DIR__ . '/assets/rs256.key.pub'),
                 'RS256',
                 [],
                 new EncodeOptions(),
-                new DecodeOptions(['RS256'], file_get_contents(__DIR__ . '/assets/rs256.key.pub')),
+                new DecodeOptions(['RS256']),
             ],
             [
                 file_get_contents(__DIR__ . '/assets/rs384.key'),
+                file_get_contents(__DIR__ . '/assets/rs384.key.pub'),
                 'RS384',
                 [],
                 new EncodeOptions(),
-                new DecodeOptions(['RS384'], file_get_contents(__DIR__ . '/assets/rs384.key.pub')),
+                new DecodeOptions(['RS384']),
             ],
             [
                 file_get_contents(__DIR__ . '/assets/rs512.key'),
+                file_get_contents(__DIR__ . '/assets/rs512.key.pub'),
                 'RS512',
                 [],
                 new EncodeOptions(),
-                new DecodeOptions(['RS512'], file_get_contents(__DIR__ . '/assets/rs512.key.pub')),
+                new DecodeOptions(['RS512']),
             ],
             [
                 (new JWK($jwk))->getPublicKey(),
+                new JWKSet([
+                    $kid => $jwk
+                ]),
                 'HS512',
                 ['kid' => $kid],
                 new EncodeOptions(),
@@ -273,13 +277,15 @@ class JWTTest extends AbstractTestCase
 
     /**
      * @dataProvider getEncodeToDecodeDataProvider
-     * @param string $keyOrSecret
+     * @param string $privateKeyOrSecret
+     * @param string|JWKSet $publicKeyOrSecret
      * @param string $alg
      * @param EncodeOptions $encodeOptions
      * @param DecodeOptions $decodeOptions
      */
     public function testEncodeToDecodeSuccess(
-        string $keyOrSecret,
+        string $privateKeyOrSecret,
+        $publicKeyOrSecret,
         string $alg,
         array $header,
         EncodeOptions $encodeOptions,
@@ -290,9 +296,9 @@ class JWTTest extends AbstractTestCase
         ];
 
         $token = new JWT($payload, $header);
-        $jwtAsString = $token->encode($keyOrSecret, $alg, $encodeOptions);
+        $jwtAsString = $token->encode($privateKeyOrSecret, $alg, $encodeOptions);
 
-        $jwt = JWT::decode($jwtAsString, $decodeOptions);
+        $jwt = JWT::decode($jwtAsString, $publicKeyOrSecret, $decodeOptions);
 
         parent::assertSame($payload, $jwt->getPayload());
 

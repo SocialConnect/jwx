@@ -103,12 +103,17 @@ class JWT
 
     /**
      * @param string $token
+     * @param string|JWKSet $publicKeyOrSecret
      * @param DecodeOptions $options
      * @return JWT
      * @throws InvalidJWT
      */
-    public static function decode(string $token, DecodeOptions $options)
+    public static function decode(string $token, $publicKeyOrSecret, DecodeOptions $options)
     {
+        if (!is_string($publicKeyOrSecret) && !$publicKeyOrSecret instanceof JWKSet) {
+            throw new \InvalidArgumentException('$privateKeyOrSecret must be string/JWK/JWKSet');
+        }
+
         $parts = explode('.', $token);
         if (count($parts) !== 3) {
             throw new InvalidJWT('Wrong number of segments');
@@ -137,12 +142,16 @@ class JWT
         }
 
         $token = new self($payload, $header, self::urlsafeB64Decode($signature64));
-        $token->validate("{$header64}.{$payload64}", $options);
+        $token->validate("{$header64}.{$payload64}", $publicKeyOrSecret, $options);
 
         return $token;
     }
 
-    protected function validateHeader(DecodeOptions $options)
+    /**
+     * @param string|JWKSet $publicKeyOrSecret
+     * @param DecodeOptions $options
+     */
+    protected function validateHeader($publicKeyOrSecret, DecodeOptions $options)
     {
         if (!isset($this->headers['alg'])) {
             throw new InvalidJWT('No alg inside header');
@@ -153,12 +162,12 @@ class JWT
         }
 
         if (isset($this->headers['kid'])) {
-            if (!$options->hasJwkSet()) {
+            if (!$publicKeyOrSecret instanceof JWKSet) {
                 throw new RuntimeException('Please specify jwk set in DecodeOptions, because there is kid inside header');
             }
         } else {
-            if ($options->hasJwkSet()) {
-                throw new InvalidJWT('No kid inside header');
+            if ($publicKeyOrSecret instanceof JWKSet) {
+                throw new InvalidJWT('No kid inside header, but $privateKeyOrSecret specified as JWKSet');
             }
         }
     }
@@ -224,57 +233,40 @@ class JWT
 
     /**
      * @param string $data
+     * @param string|JWKSet $publicKeyOrSecret
      * @param DecodeOptions $options
      * @throws InvalidJWT
      */
-    protected function validate($data, DecodeOptions $options)
+    protected function validate($data, $publicKeyOrSecret, DecodeOptions $options)
     {
-        $this->validateHeader($options);
+        $this->validateHeader($publicKeyOrSecret, $options);
         $this->validateClaims();
 
-        $result = $this->verifySignature($data, $options);
+        $result = $this->verifySignature($data, $publicKeyOrSecret, $options);
         if (!$result) {
             throw new InvalidJWT('Unexpected signature');
         }
     }
 
     /**
-     * @param array $keys
-     * @param string $kid
-     * @return JWK
-     */
-    protected function findKeyByKind(array $keys, $kid)
-    {
-        foreach ($keys as $key) {
-            if ($key['kid'] === $kid) {
-                return new JWK($key);
-            }
-        }
-
-        throw new RuntimeException('Unknown key');
-    }
-
-    /**
      * @param string $data
+     * @param string|JWKSet $publicKeyOrSecret
      * @param DecodeOptions $options
      * @return bool
      * @throws UnsupportedSignatureAlgorithm
      */
-    protected function verifySignature($data, DecodeOptions $options)
+    protected function verifySignature($data, $publicKeyOrSecret, DecodeOptions $options)
     {
         $supported = isset(self::$algorithms[$this->headers['alg']]);
         if (!$supported) {
             throw new UnsupportedSignatureAlgorithm($this->headers['alg']);
         }
 
-        if ($options->hasJwkSet()) {
-            $jwk = $this->findKeyByKind($options->getJwkSet(), $this->headers['kid']);
+        if ($publicKeyOrSecret instanceof JWKSet) {
+            $jwk = $publicKeyOrSecret->findKeyByKind($this->headers['kid']);
             $secretOrKey = $jwk->getPublicKey();
         } else {
-            $secretOrKey = $options->getSecretOrKey();
-            if (!$secretOrKey) {
-                throw new RuntimeException('Please specify $secretOrKey inside $options');
-            }
+            $secretOrKey = $publicKeyOrSecret;
         }
 
         list ($function, $signatureAlg) = self::$algorithms[$this->headers['alg']];
