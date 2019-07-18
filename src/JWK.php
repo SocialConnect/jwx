@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace SocialConnect\JWX;
 
 use SocialConnect\JWX\Exception\InvalidJWK;
+use SocialConnect\JWX\Exception\RuntimeException;
 use SocialConnect\JWX\Exception\UnsupportedJWK;
 
 class JWK
@@ -51,6 +52,7 @@ class JWK
         switch ($this->kty) {
             case 'RSA':
                 $this->parseRSAKey($parameters);
+                break;
             default:
                 throw new UnsupportedJWK("Unsupported kty, {$this->kty}");
         }
@@ -140,5 +142,28 @@ class JWK
         if (isset($parameters['d'])) {
             throw new UnsupportedJWK('RSA with private key is not supported.');
         }
+    }
+
+    /**
+     * @param string $content
+     * @return JWK
+     */
+    public static function fromRSAPublicKey(string $content): JWK
+    {
+        $publicKeyOrFalse = openssl_pkey_get_public($content);
+        if ($publicKeyOrFalse === false) {
+            throw new RuntimeException('Unable to load public key');
+        }
+
+        $dataOrFalse = openssl_pkey_get_details($publicKeyOrFalse);
+        if ($dataOrFalse === false) {
+            throw new RuntimeException('Unable to load data from public key');
+        }
+
+        return new JWK([
+            'kty' => 'RSA',
+            'e' => $dataOrFalse['rsa']['e'],
+            'n' => $dataOrFalse['rsa']['n'],
+        ]);
     }
 }
