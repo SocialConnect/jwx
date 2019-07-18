@@ -333,14 +333,19 @@ class JWT
                     throw new RuntimeException('Openssl-ext is required to use RS encryption.');
                 }
 
-                $signatureOrFalse = openssl_encrypt(
+                $signature = '';
+
+                $result = openssl_sign(
                     $data,
-                    $signatureAlg,
-                    $privateKeyOrSecret
+                    $signature,
+                    $privateKeyOrSecret,
+                    $signatureAlg
                 );
-                if ($signatureOrFalse === false) {
+                if ($result === false) {
                     throw new RuntimeException('Unable to generate signature by openssl_encrypt');
                 }
+
+                return $signature;
             case 'hash_hmac':
                 if (!function_exists('hash_hmac')) {
                     throw new RuntimeException('hash-ext is required to use HS encryption.');

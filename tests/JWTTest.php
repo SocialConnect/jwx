@@ -226,7 +226,7 @@ class JWTTest extends AbstractTestCase
         );
     }
 
-    public function testEncodeToDecodeSuccess()
+    public function getEncodeToDecodeDataProvider()
     {
         $kid = 'super-kid-' . time();
         $jwk = [
@@ -236,22 +236,67 @@ class JWTTest extends AbstractTestCase
             'e' => 'test'
         ];
 
+        $decodeOptions = new DecodeOptions(['HS512']);
+        $decodeOptions->setJwkSet([$jwk]);
+
+        return [
+            [
+                file_get_contents(__DIR__ . '/assets/rs256.key'),
+                'RS256',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['RS256'], file_get_contents(__DIR__ . '/assets/rs256.key.pub')),
+            ],
+            [
+                file_get_contents(__DIR__ . '/assets/rs384.key'),
+                'RS384',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['RS384'], file_get_contents(__DIR__ . '/assets/rs384.key.pub')),
+            ],
+            [
+                file_get_contents(__DIR__ . '/assets/rs512.key'),
+                'RS512',
+                [],
+                new EncodeOptions(),
+                new DecodeOptions(['RS512'], file_get_contents(__DIR__ . '/assets/rs512.key.pub')),
+            ],
+            [
+                (new JWK($jwk))->getPublicKey(),
+                'HS512',
+                ['kid' => $kid],
+                new EncodeOptions(),
+                $decodeOptions,
+            ]
+        ];
+    }
+
+    /**
+     * @dataProvider getEncodeToDecodeDataProvider
+     * @param string $keyOrSecret
+     * @param string $alg
+     * @param EncodeOptions $encodeOptions
+     * @param DecodeOptions $decodeOptions
+     */
+    public function testEncodeToDecodeSuccess(
+        string $keyOrSecret,
+        string $alg,
+        array $header,
+        EncodeOptions $encodeOptions,
+        DecodeOptions $decodeOptions
+    ) {
         $payload = [
             'uid' => '2955b34c-7a3b-4d96-9fd1-2930c18f9989'
         ];
 
-        $token = new JWT($payload, ['kid' => $kid]);
-        $jwtAsString = $token->encode((new JWK($jwk))->getPublicKey(), 'HS512', new EncodeOptions());
-
-        $decodeOptions = new DecodeOptions(['HS512'], 'TEST');
-        $decodeOptions->setJwkSet([$jwk]);
+        $token = new JWT($payload, $header);
+        $jwtAsString = $token->encode($keyOrSecret, $alg, $encodeOptions);
 
         $jwt = JWT::decode($jwtAsString, $decodeOptions);
 
         parent::assertSame($payload, $jwt->getPayload());
 
         $headers = $jwt->getHeaders();
-        parent::assertArrayHasKey('kid', $headers);
         parent::assertArrayHasKey('alg', $headers);
     }
 }
