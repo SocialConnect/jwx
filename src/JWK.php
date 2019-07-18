@@ -24,6 +24,15 @@ class JWK
     protected $kty;
 
     /**
+     * @link https://tools.ietf.org/html/rfc7517#section-4.4
+     *
+     * The "alg" value is a case-sensitive ASCII string. Use of this member is OPTIONAL.
+     *
+     * @var string
+     */
+    protected $alg;
+
+    /**
      * @link https://tools.ietf.org/html/rfc7517#section-9.3
      *
      * @var string
@@ -142,6 +151,10 @@ class JWK
         if (isset($parameters['d'])) {
             throw new UnsupportedJWK('RSA with private key is not supported.');
         }
+
+        if (isset($parameters['alg'])) {
+            $this->alg = $parameters['alg'];
+        }
     }
 
     /**
@@ -162,8 +175,29 @@ class JWK
 
         return new JWK([
             'kty' => 'RSA',
-            'e' => $dataOrFalse['rsa']['e'],
-            'n' => $dataOrFalse['rsa']['n'],
+            'alg' => 'RSA' . ($dataOrFalse['bits'] / 8),
+            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['e'])), '='),
+            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['n'])), '='),
         ]);
+    }
+
+    public function toArray()
+    {
+        switch ($this->kty) {
+            case 'RSA':
+                $info = [
+                    'kty' => 'RSA',
+                    'n' => $this->n,
+                    'e' => $this->e,
+                ];
+
+                if ($this->alg) {
+                    $info['alg'] = $this->alg;
+                }
+
+                return $info;
+            default:
+                throw new RuntimeException('Unsupported');
+        }
     }
 }
