@@ -158,6 +158,20 @@ class JWK
     }
 
     /**
+     * @param string $file
+     * @return JWK
+     */
+    public static function fromRSAPublicKeyFile(string $file): JWK
+    {
+        $contentOrFalse = file_get_contents($file);
+        if ($contentOrFalse === false) {
+            throw new RuntimeException('Unable to read public key');
+        }
+
+        return self::fromRSAPublicKey($contentOrFalse);
+    }
+
+    /**
      * @param string $content
      * @return JWK
      */

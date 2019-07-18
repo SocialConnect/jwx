@@ -165,7 +165,7 @@ class JWTTest extends AbstractTestCase
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            new JWKSet([]),
+            new JWKSet(['keys' => []]),
             new DecodeOptions(['RS256'])
         );
 
@@ -208,7 +208,7 @@ class JWTTest extends AbstractTestCase
         self::callProtectedMethod(
             $token,
             'validateHeader',
-            new JWKSet([]),
+            new JWKSet(['keys' => []]),
             new DecodeOptions(['RS256'])
         );
     }
@@ -284,7 +284,14 @@ class JWTTest extends AbstractTestCase
             [
                 file_get_contents(__DIR__ . '/assets/rs512.key'),
                 new JWKSet([
-                    $kid => JWK::fromRSAPublicKey(file_get_contents(__DIR__ . '/assets/rs512.key.pub'))->toArray()
+                    'keys' => [
+                        array_merge(
+                            JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs512.key.pub')->toArray(),
+                            [
+                                'kid' => $kid
+                            ]
+                        )
+                    ]
                 ]),
                 'RS512',
                 ['kid' => $kid],

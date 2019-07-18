@@ -103,14 +103,14 @@ class JWT
 
     /**
      * @param string $token
-     * @param string|JWKSet $publicKeyOrSecret
+     * @param string|JWKSet|mixed $publicKeyOrSecret
      * @param DecodeOptions $options
      * @return JWT
      * @throws InvalidJWT
      */
     public static function decode(string $token, $publicKeyOrSecret, DecodeOptions $options)
     {
-        if (!is_string($publicKeyOrSecret) && !$publicKeyOrSecret instanceof JWKSet) {
+        if (!is_string($publicKeyOrSecret) && !($publicKeyOrSecret instanceof JWKSet)) {
             throw new \InvalidArgumentException('$privateKeyOrSecret must be string/JWK/JWKSet');
         }
 
@@ -263,7 +263,7 @@ class JWT
         }
 
         if ($publicKeyOrSecret instanceof JWKSet) {
-            $jwk = $publicKeyOrSecret->findKeyByKind($this->headers['kid']);
+            $jwk = $publicKeyOrSecret->findKeyByKid($this->headers['kid']);
             $secretOrKey = $jwk->getPublicKey();
         } else {
             $secretOrKey = $publicKeyOrSecret;

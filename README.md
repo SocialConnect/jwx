@@ -10,6 +10,7 @@ Implementation:
 
 - JWT (JSON Web Token) [RFC 7519](https://tools.ietf.org/html/rfc7519)
 - JWK (JSON Web Keys) [RFC 7517](https://tools.ietf.org/html/rfc7517)
+- JWKs (JSON Web Key Set) [RFC 7517](https://tools.ietf.org/html/rfc7517#section-8.4)
 
 ## Encode
 

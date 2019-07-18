@@ -17,24 +17,26 @@ class JWKSet
     protected $keys;
 
     /**
-     * @param array<string, array> $keys
+     * @param array<string, array> $parameters
      */
-    public function __construct(array $keys)
+    public function __construct(array $parameters)
     {
-        $this->keys = array_map(static function ($key) {
-            return new JWK($key);
-        }, $keys);
+        if (isset($parameters['keys'])) {
+            $this->keys = $parameters['keys'];
+        } else {
+            throw new \InvalidArgumentException('JWKs must define keys');
+        }
     }
 
     /**
      * @param string $kid
      * @return JWK
      */
-    public function findKeyByKind(string $kid)
+    public function findKeyByKid(string $kid)
     {
-        foreach ($this->keys as $key => $jwk) {
-            if ($key === $kid) {
-                return $jwk;
+        foreach ($this->keys as $jwk) {
+            if (isset($jwk['kid']) && $jwk['kid'] === $kid) {
+                return new JWK($jwk);
             }
         }
 

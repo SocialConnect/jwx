@@ -12,7 +12,7 @@ class JWKTest extends AbstractTestCase
 {
     public function testFromRSA256PublicKey()
     {
-        $jwk = JWK::fromRSAPublicKey(file_get_contents(__DIR__ . '/assets/rs256.key.pub'));
+        $jwk = JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs256.key.pub');
 
         parent::assertSame(
             [
@@ -27,7 +27,7 @@ class JWKTest extends AbstractTestCase
 
     public function testFromRSA384PublicKey()
     {
-        $jwk = JWK::fromRSAPublicKey(file_get_contents(__DIR__ . '/assets/rs384.key.pub'));
+        $jwk = JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs384.key.pub');
 
         parent::assertSame(
             [
@@ -42,7 +42,7 @@ class JWKTest extends AbstractTestCase
 
     public function testFromRSA512PublicKey()
     {
-        $jwk = JWK::fromRSAPublicKey(file_get_contents(__DIR__ . '/assets/rs512.key.pub'));
+        $jwk = JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs512.key.pub');
 
         parent::assertSame(
             [
