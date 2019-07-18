@@ -48,20 +48,11 @@ class JWK
 
         $this->kty = $parameters['kty'];
 
-        if (!isset($parameters['n'])) {
-            throw new InvalidJWK('Unknown n');
-        }
-
-        $this->n = $parameters['n'];
-
-        if (!isset($parameters['e'])) {
-            throw new InvalidJWK('Unknown e');
-        }
-
-        $this->e = $parameters['e'];
-
-        if (isset($parameters['d'])) {
-            throw new UnsupportedJWK('RSA with private key is not supported.');
+        switch ($this->kty) {
+            case 'RSA':
+                $this->parseRSAKey($parameters);
+            default:
+                throw new UnsupportedJWK("Unsupported kty, {$this->kty}");
         }
     }
 
@@ -130,5 +121,24 @@ class JWK
     public function getKty(): string
     {
         return $this->kty;
+    }
+
+    protected function parseRSAKey(array $parameters)
+    {
+        if (!isset($parameters['n'])) {
+            throw new InvalidJWK('Unknown n');
+        }
+
+        $this->n = $parameters['n'];
+
+        if (!isset($parameters['e'])) {
+            throw new InvalidJWK('Unknown e');
+        }
+
+        $this->e = $parameters['e'];
+
+        if (isset($parameters['d'])) {
+            throw new UnsupportedJWK('RSA with private key is not supported.');
+        }
     }
 }
