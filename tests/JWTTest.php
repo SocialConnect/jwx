@@ -228,14 +228,6 @@ class JWTTest extends AbstractTestCase
     public function getEncodeToDecodeDataProvider()
     {
         $kid = 'super-kid-' . time();
-        $jwk = [
-            'kid' => $kid,
-            'kty' => 'HS512',
-            'n' => 'test',
-            'e' => 'test'
-        ];
-
-        $decodeOptions = new DecodeOptions(['HS512']);
 
         return [
             [
@@ -263,14 +255,14 @@ class JWTTest extends AbstractTestCase
                 new DecodeOptions(['RS512']),
             ],
             [
-                (new JWK($jwk))->getPublicKey(),
+                file_get_contents(__DIR__ . '/assets/rs512.key'),
                 new JWKSet([
-                    $kid => $jwk
+                    $kid => JWK::fromRSAPublicKey(file_get_contents(__DIR__ . '/assets/rs512.key.pub'))->toArray()
                 ]),
-                'HS512',
+                'RS512',
                 ['kid' => $kid],
                 new EncodeOptions(),
-                $decodeOptions,
+                new DecodeOptions(['RS512']),
             ]
         ];
     }
