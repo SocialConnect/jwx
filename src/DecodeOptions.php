@@ -25,15 +25,14 @@ class DecodeOptions
         'RS256',
         'RS384',
         'RS512',
-        //
-        'ES256',
-        'ES384',
-        'ES512',
+//        //
+//        'ES256',
+//        'ES384',
+//        'ES512',
     ];
 
     /**
      * @param array $allowedAlgorithms
-     * @param string|null $secretOrKey
      */
     public function __construct(array $allowedAlgorithms = self::SECURE_ALGORITHMS)
     {
