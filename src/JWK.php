@@ -33,6 +33,8 @@ class JWK
     protected $alg;
 
     /**
+     * modulus
+     *
      * @link https://tools.ietf.org/html/rfc7517#section-9.3
      *
      * @var string
@@ -40,11 +42,22 @@ class JWK
     protected $n;
 
     /**
+     * public exponent
+     *
      * @link https://tools.ietf.org/html/rfc7517#section-9.3
      *
      * @var string
      */
     protected $e;
+
+    /**
+     * private exponent
+     *
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $d;
 
     /**
      * @param array $parameters
@@ -149,7 +162,7 @@ class JWK
         $this->e = $parameters['e'];
 
         if (isset($parameters['d'])) {
-            throw new UnsupportedJWK('RSA with private key is not supported.');
+            $this->d = $parameters['d'];
         }
 
         if (isset($parameters['alg'])) {
@@ -195,6 +208,45 @@ class JWK
         ]);
     }
 
+    /**
+     * @param string $file
+     * @return JWK
+     */
+    public static function fromRSAPrivateKeyFile(string $file): JWK
+    {
+        $contentOrFalse = file_get_contents($file);
+        if ($contentOrFalse === false) {
+            throw new RuntimeException('Unable to read private key');
+        }
+
+        return self::fromRSAPrivateKey($contentOrFalse);
+    }
+
+    /**
+     * @param string $content
+     * @return JWK
+     */
+    public static function fromRSAPrivateKey(string $content)
+    {
+        $privateKeyOrFalse = openssl_pkey_get_private($content);
+        if ($privateKeyOrFalse === false) {
+            throw new RuntimeException('Unable to private public key');
+        }
+
+        $dataOrFalse = openssl_pkey_get_details($privateKeyOrFalse);
+        if ($dataOrFalse === false) {
+            throw new RuntimeException('Unable to load data from private key');
+        }
+
+        return new JWK([
+            'kty' => 'RSA',
+            'alg' => 'RSA' . ($dataOrFalse['bits'] / 8),
+            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['e'])), '='),
+            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['n'])), '='),
+            'd' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['d'])), '='),
+        ]);
+    }
+
     public function toArray()
     {
         switch ($this->kty) {
@@ -204,6 +256,10 @@ class JWK
                     'n' => $this->n,
                     'e' => $this->e,
                 ];
+
+                if ($this->d) {
+                    $info['d'] = $this->d;
+                }
 
                 if ($this->alg) {
                     $info['alg'] = $this->alg;
