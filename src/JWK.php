@@ -60,6 +60,56 @@ class JWK
     protected $d;
 
     /**
+     * prime1
+     *
+     * @link https://tools.ietf.org/html/rfc3447#appendix-A.1.2
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $p;
+
+    /**
+     * prime2
+     *
+     * @link https://tools.ietf.org/html/rfc3447#appendix-A.1.2
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $q;
+
+    /**
+     * exponent1
+     *
+     * @link https://tools.ietf.org/html/rfc3447#appendix-A.1.2
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $dp;
+
+    /**
+     * exponent2
+     *
+     * @link https://tools.ietf.org/html/rfc3447#appendix-A.1.2
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $dq;
+
+    /**
+     * coefficient
+     *
+     * @link https://tools.ietf.org/html/rfc3447#appendix-A.1.2
+     * @link https://tools.ietf.org/html/rfc7517#section-9.3
+     *
+     * @var string|null
+     */
+    protected $qi;
+
+    /**
      * @param array $parameters
      * @throws InvalidJWK
      */
@@ -161,12 +211,33 @@ class JWK
 
         $this->e = $parameters['e'];
 
+        if (isset($parameters['alg'])) {
+            $this->alg = $parameters['alg'];
+        }
+
+        // Private key
         if (isset($parameters['d'])) {
             $this->d = $parameters['d'];
         }
 
-        if (isset($parameters['alg'])) {
-            $this->alg = $parameters['alg'];
+        if (isset($parameters['p'])) {
+            $this->p = $parameters['p'];
+        }
+
+        if (isset($parameters['q'])) {
+            $this->q = $parameters['q'];
+        }
+
+        if (isset($parameters['dp'])) {
+            $this->dp = $parameters['dp'];
+        }
+
+        if (isset($parameters['dq'])) {
+            $this->dq = $parameters['dq'];
+        }
+
+        if (isset($parameters['qi'])) {
+            $this->qi = $parameters['qi'];
         }
     }
 
@@ -244,6 +315,11 @@ class JWK
             'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['e'])), '='),
             'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['n'])), '='),
             'd' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['d'])), '='),
+            'p' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['p'])), '='),
+            'q' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['q'])), '='),
+            'dp' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['dmp1'])), '='),
+            'dq' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['dmq1'])), '='),
+            'qi' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['iqmp'])), '='),
         ]);
     }
 
@@ -259,6 +335,11 @@ class JWK
 
                 if ($this->d) {
                     $info['d'] = $this->d;
+                    $info['p'] = $this->p;
+                    $info['q'] = $this->q;
+                    $info['dp'] = $this->dp;
+                    $info['dq'] = $this->dq;
+                    $info['qi'] = $this->qi;
                 }
 
                 if ($this->alg) {
