@@ -274,8 +274,8 @@ class JWK
         return new JWK([
             'kty' => 'RSA',
             'alg' => 'RSA' . ($dataOrFalse['bits'] / 8),
-            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['e'])), '='),
-            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['n'])), '='),
+            'e' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['e']),
+            'n' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['n']),
         ]);
     }
 
@@ -312,14 +312,14 @@ class JWK
         return new JWK([
             'kty' => 'RSA',
             'alg' => 'RSA' . ($dataOrFalse['bits'] / 8),
-            'e' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['e'])), '='),
-            'n' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['n'])), '='),
-            'd' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['d'])), '='),
-            'p' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['p'])), '='),
-            'q' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['q'])), '='),
-            'dp' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['dmp1'])), '='),
-            'dq' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['dmq1'])), '='),
-            'qi' => rtrim(str_replace(['+', '/'], ['-', '_'], base64_encode($dataOrFalse['rsa']['iqmp'])), '='),
+            'e' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['e']),
+            'n' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['n']),
+            'd' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['d']),
+            'p' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['p']),
+            'q' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['q']),
+            'dp' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['dmp1']),
+            'dq' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['dmq1']),
+            'qi' => JWT::urlsafeB64Encode($dataOrFalse['rsa']['iqmp']),
         ]);
     }
 
