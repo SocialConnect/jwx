@@ -3,6 +3,7 @@ JWX
 
 [![Packagist](https://img.shields.io/packagist/v/socialconnect/jwx.svg?style=flat-square)](https://packagist.org/packages/socialconnect/jwx)
 [![License](http://img.shields.io/packagist/l/SocialConnect/jwx.svg?style=flat-square)](https://github.com/SocialConnect/jwx/blob/master/LICENSE)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSocialConnect%2Fjwx.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FSocialConnect%2Fjwx?ref=badge_shield)
 
 ## [Documentation](https://socialconnect.lowl.io/jwx.html) :: [Getting Started](https://socialconnect.lowl.io/jwx.html)
 
@@ -44,3 +45,6 @@ var_dump($token);
 This project is open-sourced software licensed under the MIT License.
 
 See the [LICENSE](LICENSE) file for more information.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FSocialConnect%2Fjwx.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FSocialConnect%2Fjwx?ref=badge_large)
