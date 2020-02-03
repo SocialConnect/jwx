@@ -69,6 +69,8 @@ class JWT
     }
 
     /**
+     * @internal Please dont use it, it's not BC safe
+     *
      * @param string $input
      * @return string|false
      */
