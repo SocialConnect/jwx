@@ -69,12 +69,10 @@ class JWT
     }
 
     /**
-     * @internal Please dont use it, it's not BC safe
-     *
      * @param string $input
-     * @return string|false
+     * @return false|string
      */
-    public static function urlsafeB64Decode($input)
+    protected static function urlsafeBase64Decode(string $input)
     {
         $remainder = strlen($input) % 4;
         if ($remainder) {
@@ -83,6 +81,20 @@ class JWT
         }
 
         return base64_decode(strtr($input, '-_', '+/'));
+    }
+
+    /**
+     * @param string $input
+     * @return string
+     */
+    public static function urlsafeB64Decode($input)
+    {
+        $strOrFalse = self::urlsafeBase64Decode($input);
+        if ($strOrFalse === false) {
+            throw new RuntimeException('Unable to decode base64 string');
+        }
+
+        return $strOrFalse;
     }
 
     /**
@@ -117,7 +129,7 @@ class JWT
 
         list ($header64, $payload64, $signature64) = $parts;
 
-        $headerPayload = self::urlsafeB64Decode($header64);
+        $headerPayload = self::urlsafeBase64Decode($header64);
         if (!$headerPayload) {
             throw new InvalidJWT('Cannot decode base64 from header');
         }
@@ -127,7 +139,7 @@ class JWT
             throw new InvalidJWT('Cannot decode JSON from header');
         }
 
-        $decodedPayload = self::urlsafeB64Decode($payload64);
+        $decodedPayload = self::urlsafeBase64Decode($payload64);
         if (!$decodedPayload) {
             throw new InvalidJWT('Cannot decode base64 from payload');
         }
@@ -137,7 +149,7 @@ class JWT
             throw new InvalidJWT('Cannot decode JSON from payload');
         }
 
-        $decodedSignature = self::urlsafeB64Decode($signature64);
+        $decodedSignature = self::urlsafeBase64Decode($signature64);
         if (!$decodedSignature) {
             throw new InvalidJWT('Cannot decode base64 from signature');
         }
