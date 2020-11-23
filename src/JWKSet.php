@@ -9,7 +9,7 @@ namespace SocialConnect\JWX;
 
 use SocialConnect\JWX\Exception\RuntimeException;
 
-class JWKSet
+class JWKSet implements \Countable
 {
     /**
      * @var array<string, array>
@@ -41,5 +41,13 @@ class JWKSet
         }
 
         throw new RuntimeException('Unknown key');
+    }
+
+    /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return count($this->keys);
     }
 }
