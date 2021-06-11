@@ -42,6 +42,29 @@ class JWKSet implements \Countable
 
         throw new RuntimeException('Unknown key');
     }
+    
+    /**
+     * @return bool
+     */
+    public function hasDefaultKey() : bool
+    {
+        return $this->count() == 1;
+    }
+    
+    /**
+     * @return JWK
+     * @throws RuntimeException
+     */
+    public function getDefaultKey() : JWK
+    {
+        if (!$this->hasDefaultKey()) {
+            throw new \RuntimeException("No default key");
+        }
+        foreach ($this->keys as $jwk) {
+            return new JWK($jwk); //Return first JWK in Keys.
+        }
+        throw new \RuntimeException("Unreachable code reached");
+    }
 
     /**
      * @return int
