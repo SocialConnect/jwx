@@ -212,6 +212,29 @@ class JWTTest extends AbstractTestCase
             new DecodeOptions(['RS256'])
         );
     }
+    
+    public function testValidateHeaderNoKidSingleKey()
+    {
+        $kset = new JWKSet(['keys' => [
+            JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs512.key.pub')->toArray(),
+        ]]);
+        
+        $token = new JWT(
+            [],
+            [
+                'alg' => 'RS256'
+            ]
+        );
+
+        self::callProtectedMethod(
+            $token,
+            'validateHeader',
+            $kset,
+            new DecodeOptions(['RS256'])
+        );
+        
+        parent::assertTrue(true);
+    }
 
     public function testDecodeWrongNumberOfSegments()
     {
