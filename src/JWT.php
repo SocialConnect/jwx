@@ -180,7 +180,7 @@ class JWT
             }
         } else {
             if ($publicKeyOrSecret instanceof JWKSet && !$publicKeyOrSecret->hasDefaultKey()) {
-                throw new InvalidJWT('No kid inside header, but $privateKeyOrSecret specified as JWKSet without default');
+                throw new InvalidJWT('No kid inside header, but $publicKeyOrSecret specified as JWKSet without default');
             }
         }
     }

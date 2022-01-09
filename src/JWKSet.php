@@ -48,7 +48,7 @@ class JWKSet implements \Countable
      */
     public function hasDefaultKey() : bool
     {
-        return $this->count() == 1;
+        return $this->count() === 1;
     }
     
     /**
@@ -60,10 +60,9 @@ class JWKSet implements \Countable
         if (!$this->hasDefaultKey()) {
             throw new \RuntimeException("No default key");
         }
-        foreach ($this->keys as $jwk) {
-            return new JWK($jwk); //Return first JWK in Keys.
-        }
-        throw new \RuntimeException("Unreachable code reached");
+        reset($this->keys);
+
+        return new JWK(current($this->keys));
     }
 
     /**
