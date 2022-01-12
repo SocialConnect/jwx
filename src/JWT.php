@@ -179,8 +179,8 @@ class JWT
                 throw new RuntimeException('Please specify jwk set in DecodeOptions, because there is kid inside header');
             }
         } else {
-            if ($publicKeyOrSecret instanceof JWKSet) {
-                throw new InvalidJWT('No kid inside header, but $privateKeyOrSecret specified as JWKSet');
+            if ($publicKeyOrSecret instanceof JWKSet && !$publicKeyOrSecret->hasDefaultKey()) {
+                throw new InvalidJWT('No kid inside header, but $publicKeyOrSecret specified as JWKSet without default');
             }
         }
     }
@@ -276,7 +276,11 @@ class JWT
         }
 
         if ($publicKeyOrSecret instanceof JWKSet) {
-            $jwk = $publicKeyOrSecret->findKeyByKid($this->headers['kid']);
+            if (isset($this->headers['kid'])) {
+                $jwk = $publicKeyOrSecret->findKeyByKid($this->headers['kid']);
+            } else {
+                $jwk = $publicKeyOrSecret->getDefaultKey();
+            }
             $secretOrKey = $jwk->getPublicKey();
         } else {
             $secretOrKey = $publicKeyOrSecret;
