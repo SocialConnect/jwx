@@ -379,4 +379,53 @@ class JWTTest extends AbstractTestCase
         $headers = $jwt->getHeaders();
         parent::assertArrayHasKey('alg', $headers);
     }
+
+    public function testEncodeUsesBase64UrlEncoding()
+    {
+        $privateKey = file_get_contents(__DIR__ . '/assets/rs256.key');
+        assert(is_string($privateKey));
+
+        $payload = ['foo' => 'bar'];
+        $payloadJsonStr = \json_encode($payload);
+        assert(is_string($payloadJsonStr));
+        $payloadStandardBase64 = \base64_encode($payloadJsonStr);
+        parent::assertStringContainsString(
+            '=',
+            $payloadStandardBase64,
+            'Test pre-requisite failed: Standard Base64 encoded payload string has no padding'
+        );
+
+        $headers = [
+            'alg' => 'RS256',
+            'a' => 'b',
+            'typ' => 'JWT'
+        ];
+        $headersJsonStr = \json_encode($headers);
+        assert(is_string($headersJsonStr));
+        $headersStandardBase64 = \base64_encode($headersJsonStr);
+        parent::assertStringContainsString(
+            '=',
+            $headersStandardBase64,
+            'Test pre-requisite failed: Standard Base64 encoded headers string has no padding'
+        );
+
+        $token = new JWT($payload, $headers);
+        $jwtAsString = $token->encode($privateKey, 'RS256', new EncodeOptions());
+
+        parent::assertStringNotContainsString(
+            '=',
+            $jwtAsString,
+            'Encoded JWT contains padding, which is not valid Base64url'
+        );
+        parent::assertStringNotContainsString(
+            '+',
+            $jwtAsString,
+            'Encoded JWT contains + character, which is not valid Base64url'
+        );
+        parent::assertStringNotContainsString(
+            '/',
+            $jwtAsString,
+            'Encoded JWT contains / character, which is not valid Base64url'
+        );
+    }
 }
