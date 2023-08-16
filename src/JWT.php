@@ -395,8 +395,8 @@ class JWT
             throw new InvalidJWT('Cannot encode payload to JSON');
         }
 
-        $header64 = base64_encode($headerStr);
-        $payload64 = base64_encode($payloadStr);
+        $header64 = JWT::urlsafeB64Encode($headerStr);
+        $payload64 = JWT::urlsafeB64Encode($payloadStr);
 
         $signature = $this->signature($privateKeyOrSecret, $alg, "{$header64}.{$payload64}");
         $signature64 = JWT::urlsafeB64Encode($signature);
