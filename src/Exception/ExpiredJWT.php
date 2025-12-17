@@ -12,7 +12,7 @@ use Throwable;
 
 class ExpiredJWT extends RuntimeException
 {
-    public function __construct($message = 'Not Valid JWT', $code = 0, Throwable $previous = null)
+    public function __construct($message = 'Not Valid JWT', $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
