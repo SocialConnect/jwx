@@ -12,7 +12,7 @@ use Throwable;
 
 class UnsupportedJWK extends RuntimeException
 {
-    public function __construct($message = 'Unsupported JWK', $code = 0, Throwable $previous = null)
+    public function __construct($message = 'Unsupported JWK', $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
