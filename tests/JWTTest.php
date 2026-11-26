@@ -428,4 +428,27 @@ class JWTTest extends AbstractTestCase
             'Encoded JWT contains / character, which is not valid Base64url'
         );
     }
+
+    public function testRsaJwkVerifiesSignatureAndRejectsTamperedPayload()
+    {
+        $key = JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs256.key.pub')->toArray();
+        $key['kid'] = 'rsa-test-key';
+        $keys = new JWKSet(['keys' => [$key]]);
+        $privateKey = file_get_contents(__DIR__ . '/assets/rs256.key');
+        $payload = ['uid' => 'original'];
+        $token = (new JWT($payload, ['kid' => $key['kid']]))->encode(
+            $privateKey,
+            'RS256',
+            new EncodeOptions()
+        );
+
+        parent::assertSame($payload, JWT::decode($token, $keys, new DecodeOptions(['RS256']))->getPayload());
+
+        $parts = explode('.', $token);
+        $parts[1] = JWT::urlsafeB64Encode(json_encode(['uid' => 'tampered']));
+
+        parent::expectException(InvalidJWT::class);
+        parent::expectExceptionMessage('Unexpected signature');
+        JWT::decode(implode('.', $parts), $keys, new DecodeOptions(['RS256']));
+    }
 }

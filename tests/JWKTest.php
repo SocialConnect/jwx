@@ -7,9 +7,58 @@
 namespace Test\JWX;
 
 use SocialConnect\JWX\JWK;
+use SocialConnect\JWX\JWT;
 
 class JWKTest extends AbstractTestCase
 {
+    /**
+     * @dataProvider getPublicKeyIntegerDataProvider
+     */
+    public function testGetPublicKeyEncodesPositiveIntegers(string $modulus, string $exponent, string $expectedDer)
+    {
+        $jwk = new JWK([
+            'kty' => 'RSA',
+            'n' => JWT::urlsafeB64Encode($modulus),
+            'e' => JWT::urlsafeB64Encode($exponent),
+        ]);
+        $pem = $jwk->getPublicKey();
+        $encoded = str_replace(['-----BEGIN PUBLIC KEY-----', '-----END PUBLIC KEY-----', "\r", "\n"], '', $pem);
+
+        parent::assertSame($expectedDer, bin2hex(base64_decode($encoded)));
+    }
+
+    public function getPublicKeyIntegerDataProvider(): array
+    {
+        return [
+            'no sign byte needed' => [
+                "\x7f", "\x03", '301a300d06092a864886f70d0101010500030900300602017f020103',
+            ],
+            'modulus needs sign byte' => [
+                "\x80", "\x03", '301b300d06092a864886f70d0101010500030a00300702020080020103',
+            ],
+            'exponent needs sign byte' => [
+                "\x7f", "\x80", '301b300d06092a864886f70d0101010500030a00300702017f02020080',
+            ],
+            'both need sign bytes' => [
+                "\x80", "\x80", '301c300d06092a864886f70d0101010500030b0030080202008002020080',
+            ],
+            'sign bytes already present' => [
+                "\x00\x80", "\x00\x80", '301c300d06092a864886f70d0101010500030b0030080202008002020080',
+            ],
+        ];
+    }
+
+    public function testGetPublicKeyMatchesOriginalRsaPublicKey()
+    {
+        $filename = __DIR__ . '/assets/rs256.key.pub';
+        $jwk = JWK::fromRSAPublicKeyFile($filename);
+
+        parent::assertSame(
+            str_replace("\r", '', trim(file_get_contents($filename))),
+            str_replace("\r", '', trim($jwk->getPublicKey()))
+        );
+    }
+
     public function testFromRSA256PublicKey()
     {
         $jwk = JWK::fromRSAPublicKeyFile(__DIR__ . '/assets/rs256.key.pub');

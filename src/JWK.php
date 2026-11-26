@@ -138,6 +138,15 @@ class JWK
         $modulus = JWT::urlsafeB64Decode($this->n);
         $publicExponent = JWT::urlsafeB64Decode($this->e);
 
+        // JWK integers are unsigned, while ASN.1 INTEGER values are signed.
+        // A leading zero prevents the high bit from making the value negative.
+        if ($modulus !== '' && ord($modulus[0]) >= 0x80) {
+            $modulus = "\0" . $modulus;
+        }
+        if ($publicExponent !== '' && ord($publicExponent[0]) >= 0x80) {
+            $publicExponent = "\0" . $publicExponent;
+        }
+
         $components = array(
             'modulus' => pack('Ca*a*', 2, self::encodeLength(strlen($modulus)), $modulus),
             'publicExponent' => pack('Ca*a*', 2, self::encodeLength(strlen($publicExponent)), $publicExponent)
